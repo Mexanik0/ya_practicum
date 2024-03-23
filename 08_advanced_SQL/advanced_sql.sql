@@ -1,21 +1,21 @@
 -- 1. Найдите количество вопросов, которые набрали больше 300 очков или как минимум 100 раз были добавлены в «Закладки».
 SELECT COUNT(id)
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 WHERE favorites_count >= 100 or score > 300 AND post_type_id = 1
 
 
 -- 3. Сколько пользователей получили значки сразу в день регистрации? Выведите количество уникальных пользователей.
 SELECT COUNT(distinct b.user_id) AS usr_cnt
-FROM stackOVERflow.badges AS b
-inner JOIN stackOVERflow.users AS u on u.id = b.user_id
+FROM stackoverflow.badges AS b
+inner JOIN stackoverflow.users AS u on u.id = b.user_id
 WHERE CAST(DATE_trunc('day', b.creation_DATE) AS DATE) = CAST(DATE_trunc('day', u.creation_DATE) AS DATE)
 
 
 -- 4. Сколько уникальных постов пользователя с именем Joel Coehoorn получили хотя бы один голос?
 SELECT COUNT(DISTINCT p.id) AS unique_posts_count
-FROM stackOVERflow.posts p
-JOIN stackOVERflow.users u ON p.user_id = u.id
-JOIN stackOVERflow.votes v ON p.id = v.post_id
+FROM stackoverflow.posts p
+JOIN stackoverflow.users u ON p.user_id = u.id
+JOIN stackoverflow.votes v ON p.id = v.post_id
 WHERE u.display_name = 'Joel Coehoorn'
 AND v.vote_type_id != 0
 
@@ -24,7 +24,7 @@ AND v.vote_type_id != 0
 -- Таблица должна быть отсортирована по полю id.
 SELECT *,
        RANK() OVER (ORDER BY id DESC) AS rank
-FROM stackOVERflow.vote_types
+FROM stackoverflow.vote_types
 ORDER BY id
 
 
@@ -33,7 +33,7 @@ ORDER BY id
 -- Отсортируйте данные сначала по убыванию количества голосов, потом по убыванию значения идентификатора пользователя.
 SELECT user_id,
        COUNT(id) AS cnt_votes
-FROM stackOVERflow.votes
+FROM stackoverflow.votes
 WHERE vote_type_id = 6
 GROUP BY user_id
 ORDER BY cnt_votes DESC, user_id DESC
@@ -50,7 +50,7 @@ LIMIT 10
 SELECT user_id,
        COUNT(distinct id) AS cnt_badges,
        dense_rank() OVER(ORDER BY COUNT(distinct id) DESC)
-FROM stackOVERflow.badges
+FROM stackoverflow.badges
 WHERE CAST(DATE_trunc('day', creation_DATE) AS DATE) >= '2008-11-15'
       AND CAST(DATE_trunc('day', creation_DATE) AS DATE) <= '2008-12-15'
 GROUP BY user_id
@@ -69,17 +69,17 @@ SELECT title,
        user_id,
        score,
        round(avg(score) OVER(partition BY user_id), 0) AS avg_score 
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 WHERE title IS NOT NULL AND score !=0
 
 
 -- 9. Отобразите заголовки постов, которые были написаны пользователями, получившими более 1000 значков. 
 -- Посты без заголовков не должны попасть в список.
 SELECT p.title
-FROM stackOVERflow.posts AS p
+FROM stackoverflow.posts AS p
 JOIN (SELECT user_id,
              COUNT(id) AS cnt_badges
-      FROM stackOVERflow.badges
+      FROM stackoverflow.badges
       GROUP BY user_id) AS b on b.user_id = p.user_id
 WHERE p.title !='' AND b.cnt_badges >= 1000
 
@@ -98,7 +98,7 @@ SELECT id,
            WHEN views >= 100 AND views < 350 THEN 2
            WHEN views < 100 THEN 3
        END
-FROM stackOVERflow.users
+FROM stackoverflow.users
 WHERE location like '%Canada%' AND views > 0 
 
 
@@ -114,7 +114,7 @@ us_users AS (SELECT id,
                WHEN views >= 100 AND views < 350 THEN 2
                WHEN views < 100 THEN 3
            END AS GROUPs
-    FROM stackOVERflow.users
+    FROM stackoverflow.users
     WHERE location like '%Canada%' AND views > 0)
     
 SELECT id,
@@ -138,7 +138,7 @@ ORDER BY views DESC, id;
 WITH 
 us_users AS (SELECT CAST(DATE_trunc('day', creation_DATE) AS DATE) AS dt_day,
                    COUNT(id) AS cnt_users
-            FROM stackOVERflow.users
+            FROM stackoverflow.users
             WHERE CAST(DATE_trunc('month', creation_DATE) AS DATE) = '2008-11-01'
             GROUP BY dt_day)
             
@@ -154,8 +154,8 @@ WITH
 us_users AS (SELECT p.user_id AS user_id, 
                     u.creation_DATE AS reg_DATE, 
                     min(p.creation_DATE) OVER(partition BY u.id) AS dt_first_post
-             FROM stackOVERflow.posts AS p
-             JOIN stackOVERflow.users AS u on p.user_id = u.id)
+             FROM stackoverflow.posts AS p
+             JOIN stackoverflow.users AS u on p.user_id = u.id)
              
 SELECT distinct user_id,
        dt_first_post - reg_DATE AS dt_diff
@@ -167,7 +167,7 @@ FROM us_users
 -- Результат отсортируйте по убыванию общего количества просмотров.
 SELECT CAST(DATE_trunc('month', creation_DATE) AS DATE) AS dt_month,
        sum(views_count) AS sum_views
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 WHERE extract(year FROM CAST(creation_DATE AS DATE)) = 2008
 GROUP BY dt_month
 ORDER BY sum_views DESC
@@ -179,8 +179,8 @@ ORDER BY sum_views DESC
 -- Отсортируйте результат по полю с именами в лексикографическом порядке.
 WITH
 first_tab AS (SELECT u.display_name, COUNT(distinct p.user_id)   
-              FROM stackOVERflow.posts AS p
-              JOIN stackOVERflow.users AS u on u.id = p.user_id
+              FROM stackoverflow.posts AS p
+              JOIN stackoverflow.users AS u on u.id = p.user_id
               WHERE p.post_type_id = 2 AND
                     p.creation_DATE::DATE BETWEEN u.creation_DATE::DATE AND (u.creation_DATE::DATE + INTERVAL '1 month')
               GROUP BY u.display_name
@@ -195,11 +195,11 @@ FROM first_tab
 -- Отсортируйте таблицу по значению месяца по убыванию.
 SELECT CAST(DATE_trunc('month', creation_DATE) AS DATE) AS dt_month,
        COUNT(id) AS cnt_posts
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 WHERE extract(year FROM CAST(creation_DATE AS DATE)) = 2008
         AND user_id in (SELECT distinct u.id
-                          FROM stackOVERflow.posts AS p
-                          JOIN stackOVERflow.users AS u on u.id = p.user_id
+                          FROM stackoverflow.posts AS p
+                          JOIN stackoverflow.users AS u on u.id = p.user_id
                           WHERE CAST(DATE_trunc('month', u.creation_DATE) AS DATE) = '2008-09-01'
                                 AND CAST(DATE_trunc('month', p.creation_DATE) AS DATE) = '2008-12-01')
 GROUP BY dt_month
@@ -216,7 +216,7 @@ SELECT user_id,
        creation_DATE,
        views_count,
        sum(views_count) OVER(partition BY user_id ORDER BY creation_DATE) AS views_cum
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 ORDER BY user_id
 
 
@@ -226,7 +226,7 @@ ORDER BY user_id
 WITH
 usr AS (SELECT user_id,
                COUNT(distinct extract(DAY FROM CAST(creation_DATE AS DATE))) AS dt_day
-        FROM stackOVERflow.posts
+        FROM stackoverflow.posts
         WHERE CAST(DATE_trunc('day', creation_DATE) AS DATE) >= '2008-12-01' AND 
               CAST(DATE_trunc('day', creation_DATE) AS DATE) <= '2008-12-07'
         GROUP BY user_id)
@@ -246,7 +246,7 @@ FROM usr
 WITH
 dt_m AS (SELECT EXTRACT(MONTH FROM CAST(creation_DATE AS DATE)) AS dt_month,
        COUNT(id) AS posts_amt
-FROM stackOVERflow.posts
+FROM stackoverflow.posts
 WHERE CAST(DATE_TRUNC('month', creation_DATE) AS DATE) >= '2008-09-01' AND
       CAST(DATE_TRUNC('month', creation_DATE) AS DATE) < '2009-01-01'
 GROUP BY dt_month)
@@ -262,14 +262,13 @@ FROM dt_m
 -- дата и время последнего поста, опубликованного на этой неделе.
 WITH
 top_user AS (SELECT user_id, COUNT(id) AS cnt_posts
-             FROM stackOVERflow.posts
-             --WHERE CAST(DATE_trunc('month', creation_DATE) AS DATE) = '2008-10-01'
+             FROM stackoverflow.posts
              GROUP BY user_id
              ORDER BY cnt_posts DESC
              LIMIT 1)
              
 SELECT extract(week FROM CAST(creation_DATE AS DATE)) AS num_week,
-       max(creation_DATE) AS dt_lASt_post
+       max(creation_DATE) AS dt_last_post
 FROM stackOVERflow.posts AS p
 JOIN top_user AS u on u.user_id = p.user_id
 WHERE p.user_id in (p.user_id) AND
