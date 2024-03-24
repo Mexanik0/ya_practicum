@@ -12,6 +12,6 @@
 
 
 
-**Инструменты**: `Python`, `Pandas`, `Matplotlib`, `SciPy`, `Seaborn`, `itertools`, `phik` `MS PowerPoint`
+**Инструменты**: `Python` `Pandas` `Matplotlib` `SciPy` `Seaborn` `itertools` `phik` `MS PowerPoint`
 
 _keywords_: `обработка данных` `статистический тест` `проверка статистических гипотез` `визуализация данных` `кластеризация` `декомпозиция`
