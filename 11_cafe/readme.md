@@ -9,6 +9,6 @@
 
 <a href="https://drive.google.com/file/d/1RfD_Nc-3vWBi8UTfZ7TqmtAxiVshc809/view?usp=sharing" target="_blank">Ссылка на презентацию</a>
 
-**Инструменты**: `Python` `Pandas` `Seaborn` `Plotly` `MS PowerPoint`
+**Инструменты**: `Python` `Pandas` `Matplotlib` `Seaborn` `Plotly` `MS PowerPoint`
 
 _keywords_: `обработка данных` `визуализация данных` `создание презентаций`
