@@ -9,7 +9,7 @@
 Разработать рекомендации для снижения оттока клиентов банка
 
 ## Итоги исследования
-
+ 
 
 
 **Инструменты**: `Python` `Pandas` `Matplotlib` `SciPy` `Seaborn` `itertools` `phik` `MS PowerPoint`
